@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
 
         FirebaseApp.initializeApp(MainActivity.this);
         db = FirebaseFirestore.getInstance();
-        reference = db.collection(myAdapter.COLLECTION_NAME);
+        reference = db.collection(MyAdapter.COLLECTION_NAME);
 
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         editor = sp.edit();
@@ -165,21 +165,21 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
                     if (isDocumentDeleted)
                     {
                         for(int index = 0 ; index < myAdapter.data.size(); index++)
-                            if (myAdapter.data.get(index).Id.equals(id)) {
+                            if (myAdapter.data.get(index).getId().equals(id)) {
                                 myAdapter.delete_message(index);
                                 break;
                             }
                     }
 
                     else if(isDocumentAdded
-                            && !documentSnapshot.getId().equals(myAdapter.GLOBAL_ID_DOCUMENT_ID)
+                            && !documentSnapshot.getId().equals(MyAdapter.GLOBAL_ID_DOCUMENT_ID)
                             && !documentSnapshot.getId().equals(FIRESTORE_USER_ID))
                     {
                         Map<String, Object> new_doc_data = documentSnapshot.getData();
-                        String Id = new_doc_data.get(myAdapter.MESSAGE_ID_FIELD)+"";
-                        String content = new_doc_data.get(myAdapter.MESSAGE_CONTENT_FIELD)+"";
-                        String timestamp = new_doc_data.get(myAdapter.MESSAGE_TIMESTAMP) + "";
-                        String device = new_doc_data.get(myAdapter.MESSAGE_DEVICE_INFO) + "";
+                        String Id = new_doc_data.get(MyAdapter.MESSAGE_ID_FIELD)+"";
+                        String content = new_doc_data.get(MyAdapter.MESSAGE_CONTENT_FIELD)+"";
+                        String timestamp = new_doc_data.get(MyAdapter.MESSAGE_TIMESTAMP) + "";
+                        String device = new_doc_data.get(MyAdapter.MESSAGE_DEVICE_INFO) + "";
                         myAdapter.add_message(Id, timestamp, content, device);
                     }
                 }
@@ -190,11 +190,11 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
     @Override
     public void itemLongClick(View view, final int position) {
         Message message = myAdapter.data.get(position);
-        Intent intent = new Intent(MainActivity.this, MessageDetails.class);
-        intent.putExtra(MessageDetails.INTENT__KEY_MESSAGE_CONTENT, message.Content);
-        intent.putExtra(MessageDetails.INTENT__KEY_MESSAGE_ID, message.Id);
-        intent.putExtra(MessageDetails.INTENT__KEY_MESSAGE_TIMESTAMP, message.Timestamp);
-        intent.putExtra(MessageDetails.INTENT__KEY_MESSAGE_DEVICE, message.Device);
+        Intent intent = new Intent(MainActivity.this, Message.MessageDetails.class);
+        intent.putExtra(Message.MessageDetails.INTENT__KEY_MESSAGE_CONTENT, message.getText());
+        intent.putExtra(Message.MessageDetails.INTENT__KEY_MESSAGE_ID, message.getId());
+        intent.putExtra(Message.MessageDetails.INTENT__KEY_MESSAGE_TIMESTAMP, message.getTimeStamp());
+        intent.putExtra(Message.MessageDetails.INTENT__KEY_MESSAGE_DEVICE, message.getDevice());
         intent.putExtra(DELETE_MESSAGE_CODE, position);
         intent.putExtra(USERNAME, username_val);
         startActivity(intent);
@@ -215,7 +215,6 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
         myAdapter.supportConfigurationChange();
     }
 
-    /*-------------------  UI BACKGROUND THREAD ACTIVATES READ FROM FIRE BASE -------------------*/
     private class getFireBaseId extends AsyncTask<Void, Void, Void>
     {
         @Override
@@ -225,7 +224,6 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
         }
     }
 
-    /*------------------------  UI BACKGROUND THREAD ACTIVATES INSERTION ------------------------*/
     private class insertDataToFireBase extends AsyncTask<String, Void, Void>
     {
         @Override
@@ -235,7 +233,6 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
         }
     }
 
-    /*---------------------  UI BACKGROUND THREAD ACTIVATES SYNCHRONIZATION ---------------------*/
     public class syncLocalToRemoteFireBase extends AsyncTask<Void, Void, Void>
     {
         @Override

@@ -1,5 +1,6 @@
 package com.example.ex5_v1;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -95,8 +96,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        String message = data.get(position).Content;
-        String timestamp = data.get(position).Timestamp;
+        String message = data.get(position).getText();
+        String timestamp = data.get(position).getTimeStamp();
         holder.textView.setText(message);
         holder.timestamp.setText(timestamp);
     }
@@ -119,7 +120,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     }
 
     public void delete_message(int position){
-        new DeleteDataFromFireBase().execute(this.data.get(position).Id);
+        new DeleteDataFromFireBase().execute(this.data.get(position).getId());
         this.data.remove(position);
         data_size -= 1;
         saveEditedData();
@@ -145,7 +146,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     }
 
     public static String getTime() {
-        DateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
+        @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
         return dateFormat.format(new Date());
     }
 
@@ -155,27 +156,26 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     }
 
 
-    /*---------------------------  INSERT DATA TO FIRE BASE ---------------------------*/
+
     public void addToRemoteFireBase(final String message)
     {
         String currentTime = getTime();
         String device = Build.MANUFACTURER + " " + Build.MODEL + " " + Build.VERSION.RELEASE;
-        incrementGlobalId(local_id);
+        incrementGlobalId();
         addDocument(local_id, message, currentTime, device);
     }
 
     public void addDocument(final int id, final String message, String currentTime, String device)
     {
         Map<String, Object> sent_message = new HashMap<>();
-        int increment_id = id + 1;
 
         sent_message.put(MESSAGE_CONTENT_FIELD, message);
         sent_message.put(MESSAGE_TIMESTAMP,currentTime);
-        sent_message.put(MESSAGE_ID_FIELD, increment_id);
+        sent_message.put(MESSAGE_ID_FIELD, id);
         sent_message.put(MESSAGE_DEVICE_INFO, device);
 
         db.collection(COLLECTION_NAME)
-                .document(increment_id + "")
+                .document(id + "")
                 .set(sent_message)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -189,17 +189,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                         Log.w(" ", "Error writing document", e);
                     }
                 });
-        local_id++;
     }
 
-    /*---------------------------  INCREMENT GLOBAL ID TO FIRE BASE ---------------------------*/
-    public void incrementGlobalId(int id)
+    public void incrementGlobalId()
     {
+//        if(flag){
+            local_id++;
         DocumentReference washingtonRef = db.collection(COLLECTION_NAME).
                 document(GLOBAL_ID_DOCUMENT_ID);
 
         washingtonRef
-                .update(GLOBAL_ID_FIELD_NAME, id + 1)
+                .update(GLOBAL_ID_FIELD_NAME, local_id)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -214,7 +214,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 });
     }
 
-    /*---------------------------  SELECT GLOBAL ID FROM FIRE BASE ---------------------------*/
     public void getGlobalId()
     {
         DocumentReference docRef = db.collection(COLLECTION_NAME).
@@ -238,7 +237,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         });
     }
 
-    /*---------------------------  DELETE DATA FROM FIRE BASE ---------------------------*/
     public void deleteDocument(String doc_id)
     {
         db.collection(COLLECTION_NAME).document(doc_id)
@@ -251,7 +249,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 });
     }
 
-    /*---------------------------  SELECT ALL DATA FROM FIRE BASE ---------------------------*/
     public void loadDataFromRemoteFireBase()
     {
         final ArrayList<Message> d = new ArrayList<Message>();
@@ -278,8 +275,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                             }
 
                             for (Message m: d)
-                                add_message(m.Id, m.Timestamp, m.Content, m.Device);
-//                            loadData();
+                                add_message(m.getId(), m.getTimeStamp(), m.getText(), m.getDevice());
 
                         } else {
                             Log.d(" ", "Error getting documents: ", task.getException());
@@ -288,7 +284,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 });
     }
 
-    /*------------------------  UI BACKGROUND THREAD ACTIVATES DELETE ------------------------*/
     private class DeleteDataFromFireBase extends AsyncTask<String, Void, Void>
     {
         @Override
