@@ -30,8 +30,8 @@ import javax.annotation.Nullable;
 
 public class MainActivity extends AppCompatActivity implements MyAdapter.recItemOnLongClick{
 
-    public static final String SP_DATA_SIZE_KEY = "data_size";
-    public static final String SP_DATA_LIST_KEY = "sent_messages";
+    public static final String SP_DATA_SIZE = "data_size";
+    public static final String SP_DATA_LIST = "sent_messages";
     public static final String SP_SYNC_FLAG = "first_launch";
 
     public static final String FIRESTORE_USER_ID = "User7m6ztx0eqyPDc7tIQlHe";
@@ -46,24 +46,25 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
     public static final String USERNAME = "username";
     public static final String DELETE_MESSAGE_CODE = "pos";
 
-    Button button;
-    EditText editText;
-    TextView helloMessage;
-    RecyclerView recyclerView;
+    private Button button;
+    private EditText editText;
+    private TextView helloMessage;
+    private RecyclerView recyclerView;
 
-    MyAdapter myAdapter;
+    private MyAdapter myAdapter;
 
-    SharedPreferences sp;
-    SharedPreferences.Editor editor;
+    private SharedPreferences sp;
+    private SharedPreferences.Editor editor;
 
-    FirebaseFirestore db;
-    CollectionReference reference;
+    private FirebaseFirestore db;
+    private CollectionReference reference;
 
-    String username_val;
+    private String username;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         button = (Button) findViewById(R.id.button3);
         editText = (EditText) findViewById(R.id.editText2);
         recyclerView = (RecyclerView) findViewById(R.id.rec1);
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         editor = sp.edit();
 
-        int data_size = sp.getInt(SP_DATA_SIZE_KEY, 0);
+        int data_size = sp.getInt(SP_DATA_SIZE, 0);
 
         myAdapter = new MyAdapter(data_size, sp, editor, db);
         myAdapter.setClickListener(this);
@@ -129,15 +130,15 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
 
         if(code.equals(REGISTERED) || code.equals(NOT_FIRST_LAUNCH)) {
             String username = extras.getString(USERNAME);
-            username_val = username;
+            this.username = username;
             helloMessage.setText("Hello " + username);
             return;
         }
 
         if(code.equals(DELETE)) {
             myAdapter.deleteMessage(extras.getInt(DELETE_MESSAGE_CODE));
-            username_val = extras.getString(USERNAME);
-            helloMessage.setText("Hello " + username_val);
+            username = extras.getString(USERNAME);
+            helloMessage.setText("Hello " + username);
             return;
         }
 
@@ -196,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
         intent.putExtra(Message.MessageDetails.INTENT__KEY_MESSAGE_TIMESTAMP, message.getTimeStamp());
         intent.putExtra(Message.MessageDetails.INTENT__KEY_MESSAGE_DEVICE, message.getDevice());
         intent.putExtra(DELETE_MESSAGE_CODE, position);
-        intent.putExtra(USERNAME, username_val);
+        intent.putExtra(USERNAME, username);
         startActivity(intent);
     }
 

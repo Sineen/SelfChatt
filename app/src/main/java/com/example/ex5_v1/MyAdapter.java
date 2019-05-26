@@ -90,7 +90,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.view_one_message, parent, false);
+        View view = inflater.inflate(R.layout.interior_one_message, parent, false);
         return new MyViewHolder(view);
     }
 
@@ -128,9 +128,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     }
 
     public void saveEditedData() {
-        editor.putInt(MainActivity.SP_DATA_SIZE_KEY, this.data_size);
+        editor.putInt(MainActivity.SP_DATA_SIZE, this.data_size);
         String wjson = gson.toJson(this.data);
-        editor.putString(MainActivity.SP_DATA_LIST_KEY, wjson);
+        editor.putString(MainActivity.SP_DATA_LIST, wjson);
         editor.apply();
     }
 
@@ -139,7 +139,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     }
 
     public void loadData() {
-        String rjson = sharedPreferences.getString(MainActivity.SP_DATA_LIST_KEY, "");
+        String rjson = sharedPreferences.getString(MainActivity.SP_DATA_LIST, "");
         Type type = new TypeToken<List<Message>>() {
         }.getType();
         this.data = gson.fromJson(rjson, type);

@@ -9,8 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MessageDetails"></activity>
-        <activity android:name=".LauncherActivity" >
+        <activity android:name=".Message$MessageDetails" android:windowSoftInputMode="adjustResize"></activity>
+        <activity android:name=".LauncherActivity" android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity"
-            android:windowSoftInputMode="adjustNothing"
+            android:windowSoftInputMode="adjustResize"
             android:launchMode="singleTop">
 
         </activity>
