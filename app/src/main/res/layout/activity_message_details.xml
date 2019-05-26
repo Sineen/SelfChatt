@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MessageDetails">
+    tools:context=".Message$MessageDetails">
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Message Info"
+        android:text="@string/message_info"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -75,7 +75,7 @@
         android:layout_width="395dp"
         android:layout_height="wrap_content"
         android:background="@android:color/holo_red_dark"
-        android:text="PERMANENT DELETE"
+        android:text="@string/permanent_delete"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

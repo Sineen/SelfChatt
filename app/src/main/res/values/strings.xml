@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">ex5_v1</string>
+    <string name="timestamp">hh:mm</string>
+    <string name="permanent_delete">PERMANENT DELETE</string>
+    <string name="message_info">Message Info</string>
+    <string name="hello_user">Hello User!</string>
+    <string name="send_message">Send Message</string>
+    <string name="type_a_message">Type a message</string>
+    <string name="hello_new_user">Hello, new user!</string>
+    <string name="please_fill_up_your_name">Please fill up your name:</string>
+    <string name="enter_your_name_here">Enter your name here</string>
+    <string name="this_is_my_name">This is my name</string>
+    <string name="skip">Skip</string>
 </resources>

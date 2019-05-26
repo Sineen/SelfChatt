@@ -34,26 +34,26 @@ import java.util.List;
 import java.util.Map;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
-    int local_id = 0;
+    int CounterId = 0;
 
     public static final String TIME_FORMAT = "kk:mm";
-    public static final String GLOBAL_ID_DOCUMENT_ID = "oLi5oPOG4Q44q9nbekLE";
-    public static final String GLOBAL_ID_FIELD_NAME = "project_id";
+    public static final String DOCUMENT_ID = "oLi5oPOG4Q44q9nbekLE";
+    public static final String PROJECT_ID = "project_id";
     public static final String COLLECTION_NAME = "messages";
 
-    public static final String MESSAGE_CONTENT_FIELD = "content";
-    public static final String MESSAGE_ID_FIELD = "id";
+    public static final String MESSAGE_CONTENT = "content";
+    public static final String MESSAGE_ID = "id";
     public static final String MESSAGE_TIMESTAMP = "timestamp";
-    public static final String MESSAGE_DEVICE_INFO = "device";
+    public static final String MESSAGE_DEVICE = "device";
 
     public ArrayList<Message> data;
 
     private recItemOnLongClick clickedMessage;
     public int data_size;
-    private SharedPreferences sp;
+    private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private Gson gson;
-    private FirebaseFirestore db;
+    private FirebaseFirestore dataBase;
 
     public interface recItemOnLongClick {
         void itemLongClick(View view, final int position);
@@ -79,12 +79,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     public MyAdapter(int size, SharedPreferences other_sp, SharedPreferences.Editor other_editor,
                      FirebaseFirestore db){
-        this.data = new ArrayList<Message>();
-        this.data_size = size;
-        this.sp = other_sp;
-        this.editor = other_editor;
-        this.gson = new Gson();
-        this.db = db;
+        data = new ArrayList<Message>();
+        data_size = size;
+        sharedPreferences = other_sp;
+        editor = other_editor;
+        gson = new Gson();
+        dataBase = db;
     }
 
     @Override
@@ -112,14 +112,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         return data.size();
     }
 
-    public void add_message(String id, String timestamp, String message, String device){
+    public void addMessage(String id, String timestamp, String message, String device){
         this.data.add(new Message(id, timestamp, message, device));
         data_size += 1;
         saveEditedData();
         notifyDataSetChanged();
     }
 
-    public void delete_message(int position){
+    public void deleteMessage(int position){
         new DeleteDataFromFireBase().execute(this.data.get(position).getId());
         this.data.remove(position);
         data_size -= 1;
@@ -139,7 +139,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     }
 
     public void loadData() {
-        String rjson = sp.getString(MainActivity.SP_DATA_LIST_KEY, "");
+        String rjson = sharedPreferences.getString(MainActivity.SP_DATA_LIST_KEY, "");
         Type type = new TypeToken<List<Message>>() {
         }.getType();
         this.data = gson.fromJson(rjson, type);
@@ -162,19 +162,19 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         String currentTime = getTime();
         String device = Build.MANUFACTURER + " " + Build.MODEL + " " + Build.VERSION.RELEASE;
         incrementGlobalId();
-        addDocument(local_id, message, currentTime, device);
+        addDocument(CounterId, message, currentTime, device);
     }
 
     public void addDocument(final int id, final String message, String currentTime, String device)
     {
         Map<String, Object> sent_message = new HashMap<>();
 
-        sent_message.put(MESSAGE_CONTENT_FIELD, message);
+        sent_message.put(MESSAGE_CONTENT, message);
         sent_message.put(MESSAGE_TIMESTAMP,currentTime);
-        sent_message.put(MESSAGE_ID_FIELD, id);
-        sent_message.put(MESSAGE_DEVICE_INFO, device);
+        sent_message.put(MESSAGE_ID, id);
+        sent_message.put(MESSAGE_DEVICE, device);
 
-        db.collection(COLLECTION_NAME)
+        dataBase.collection(COLLECTION_NAME)
                 .document(id + "")
                 .set(sent_message)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -193,13 +193,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     public void incrementGlobalId()
     {
-//        if(flag){
-            local_id++;
-        DocumentReference washingtonRef = db.collection(COLLECTION_NAME).
-                document(GLOBAL_ID_DOCUMENT_ID);
+        CounterId++;
+        DocumentReference washingtonRef = dataBase.collection(COLLECTION_NAME).
+                document(DOCUMENT_ID);
 
         washingtonRef
-                .update(GLOBAL_ID_FIELD_NAME, local_id)
+                .update(PROJECT_ID, CounterId)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -216,8 +215,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     public void getGlobalId()
     {
-        DocumentReference docRef = db.collection(COLLECTION_NAME).
-                document(GLOBAL_ID_DOCUMENT_ID);
+        DocumentReference docRef = dataBase.collection(COLLECTION_NAME).
+                document(DOCUMENT_ID);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
 
             @Override
@@ -225,8 +224,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        final String id = document.getData().get(GLOBAL_ID_FIELD_NAME) + "";
-                        local_id = Integer.parseInt(id);
+                        final String id = document.getData().get(PROJECT_ID) + "";
+                        CounterId = Integer.parseInt(id);
                     } else {
                         Log.d("", "No such document");
                     }
@@ -239,7 +238,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     public void deleteDocument(String doc_id)
     {
-        db.collection(COLLECTION_NAME).document(doc_id)
+        dataBase.collection(COLLECTION_NAME).document(doc_id)
                 .delete()
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -252,7 +251,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     public void loadDataFromRemoteFireBase()
     {
         final ArrayList<Message> d = new ArrayList<Message>();
-        db.collection(COLLECTION_NAME)
+        dataBase.collection(COLLECTION_NAME)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -262,20 +261,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                             Map<String, Object> one_message;
 
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                if(!document.getId().equals(GLOBAL_ID_DOCUMENT_ID) &&
+                                if(!document.getId().equals(DOCUMENT_ID) &&
                                         !document.getId().equals(MainActivity.FIRESTORE_USER_ID))
                                 {
                                     one_message = document.getData();
-                                    id = one_message.get(MESSAGE_ID_FIELD) + "";
+                                    id = one_message.get(MESSAGE_ID) + "";
                                     timestamp = one_message.get(MESSAGE_TIMESTAMP) + "";
-                                    content = one_message.get(MESSAGE_CONTENT_FIELD) + "";
-                                    device = one_message.get(MESSAGE_DEVICE_INFO) + "";
+                                    content = one_message.get(MESSAGE_CONTENT) + "";
+                                    device = one_message.get(MESSAGE_DEVICE) + "";
                                     d.add(new Message(id, timestamp, content, device));
                                 }
                             }
 
                             for (Message m: d)
-                                add_message(m.getId(), m.getTimeStamp(), m.getText(), m.getDevice());
+                                addMessage(m.getId(), m.getTimeStamp(), m.getText(), m.getDevice());
 
                         } else {
                             Log.d(" ", "Error getting documents: ", task.getException());

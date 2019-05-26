@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
         }
 
         if(code.equals(DELETE)) {
-            myAdapter.delete_message(extras.getInt(DELETE_MESSAGE_CODE));
+            myAdapter.deleteMessage(extras.getInt(DELETE_MESSAGE_CODE));
             username_val = extras.getString(USERNAME);
             helloMessage.setText("Hello " + username_val);
             return;
@@ -166,21 +166,21 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.recItem
                     {
                         for(int index = 0 ; index < myAdapter.data.size(); index++)
                             if (myAdapter.data.get(index).getId().equals(id)) {
-                                myAdapter.delete_message(index);
+                                myAdapter.deleteMessage(index);
                                 break;
                             }
                     }
 
                     else if(isDocumentAdded
-                            && !documentSnapshot.getId().equals(MyAdapter.GLOBAL_ID_DOCUMENT_ID)
+                            && !documentSnapshot.getId().equals(MyAdapter.DOCUMENT_ID)
                             && !documentSnapshot.getId().equals(FIRESTORE_USER_ID))
                     {
                         Map<String, Object> new_doc_data = documentSnapshot.getData();
-                        String Id = new_doc_data.get(MyAdapter.MESSAGE_ID_FIELD)+"";
-                        String content = new_doc_data.get(MyAdapter.MESSAGE_CONTENT_FIELD)+"";
+                        String Id = new_doc_data.get(MyAdapter.MESSAGE_ID)+"";
+                        String content = new_doc_data.get(MyAdapter.MESSAGE_CONTENT)+"";
                         String timestamp = new_doc_data.get(MyAdapter.MESSAGE_TIMESTAMP) + "";
-                        String device = new_doc_data.get(MyAdapter.MESSAGE_DEVICE_INFO) + "";
-                        myAdapter.add_message(Id, timestamp, content, device);
+                        String device = new_doc_data.get(MyAdapter.MESSAGE_DEVICE) + "";
+                        myAdapter.addMessage(Id, timestamp, content, device);
                     }
                 }
             }
